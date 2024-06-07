@@ -20,7 +20,7 @@ type Post struct {
 }
 
 type Comment struct {
-	PostID int    `json:"post_id"`
+	PostID int    `json:"postId"`
 	ID     int    `json:"id"`
 	Name   string `json:"name"`
 	Email  string `json:"email"`
@@ -36,11 +36,19 @@ func main() {
 		fmt.Println("An error occured while reading input. Please try again", err)
 		return
 	}
+	//TODO Maybe handle empty input
+
 	// remove the delimeter from the string
 	input = strings.TrimSuffix(input, "\n")
 	inputInt, err := strconv.Atoi(input)
+	posts, _ := fetchPosts(inputInt)
+	postIDs := getPostID(posts)
+	comments, _ := fetchComments(postIDs)
 	fmt.Println(input)
-	fmt.Println(fetchPosts(inputInt))
+	//fmt.Println(posts)
+	fmt.Println(postIDs)
+	fmt.Println(comments)
+	fmt.Println(len(comments))
 }
 
 func fetchPosts(userID int) ([]Post, error) {
@@ -65,4 +73,39 @@ func fetchPosts(userID int) ([]Post, error) {
 		return nil, err
 	}
 	return posts, err
+}
+
+func getPostID(post []Post) []int {
+	var postIDS []int
+	for _, post := range post {
+		postIDS = append(postIDS, post.ID)
+	}
+	return postIDS
+}
+
+func fetchComments(postIDs []int) ([]Comment, error) {
+	var allComments []Comment
+
+	for _, postID := range postIDs {
+		url := fmt.Sprintf("https://jsonplaceholder.typicode.com/comments?postId=%d", postID)
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		var comments []Comment
+		err = json.Unmarshal(body, &comments)
+		if err != nil {
+			return nil, err
+		}
+
+		allComments = append(allComments, comments...)
+	}
+
+	return allComments, nil
 }
