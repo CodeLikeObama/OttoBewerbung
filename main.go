@@ -13,10 +13,11 @@ import (
 )
 
 type Post struct {
-	UserID int    `json:"userId"`
-	ID     int    `json:"id"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
+	UserID   int    `json:"userId"`
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Body     string `json:"body"`
+	Comments []Comment
 }
 
 type Comment struct {
@@ -41,17 +42,18 @@ func main() {
 	// remove the delimeter from the string
 	input = strings.TrimSuffix(input, "\n")
 	inputInt, err := strconv.Atoi(input)
-	posts, _ := fetchPosts(inputInt)
-	postIDs := getPostID(posts)
-	comments, _ := fetchComments(postIDs)
+	posts, _ := fetchPostsByUserID(inputInt)
+	//postIDs := getPostIDs(posts)
+	//comments, _ := fetchCommentsByPostID(postIDs)
 	fmt.Println(input)
 	//fmt.Println(posts)
-	fmt.Println(postIDs)
-	fmt.Println(comments)
-	fmt.Println(len(comments))
+	//fmt.Println(postIDs)
+	//fmt.Println(comments)
+	//fmt.Println(len(comments))
+	fmt.Println(AppendCommentToPost(posts))
 }
 
-func fetchPosts(userID int) ([]Post, error) {
+func fetchPostsByUserID(userID int) ([]Post, error) {
 	//handle invalid Input
 	if userID > 10 {
 		return nil, errors.New("User ID out of range")
@@ -72,10 +74,11 @@ func fetchPosts(userID int) ([]Post, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return posts, err
 }
 
-func getPostID(post []Post) []int {
+func getPostIDs(post []Post) []int {
 	var postIDS []int
 	for _, post := range post {
 		postIDS = append(postIDS, post.ID)
@@ -83,7 +86,8 @@ func getPostID(post []Post) []int {
 	return postIDS
 }
 
-func fetchComments(postIDs []int) ([]Comment, error) {
+/*
+func fetchCommentsByPostID(postIDs []int) ([]Comment, error) {
 	var allComments []Comment
 
 	for _, postID := range postIDs {
@@ -104,8 +108,42 @@ func fetchComments(postIDs []int) ([]Comment, error) {
 			return nil, err
 		}
 
-		allComments = append(allComments, comments...)
+		allComments = append(allComments, comments...) //... variadic function so that each slice what we append can be andy size  and not a fixed size
 	}
 
 	return allComments, nil
+}
+*/
+
+func fetchCommentsByPostID(postID int) ([]Comment, error) {
+	postIDString := strconv.Itoa(postID)
+	resp, err := http.Get("https://jsonplaceholder.typicode.com/comments?postId=" + postIDString)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var comments []Comment
+	err = json.Unmarshal(body, &comments)
+	if err != nil {
+		return nil, err
+	}
+
+	return comments, nil
+}
+
+func AppendCommentToPost(posts []Post) ([]Post, error) {
+	for i, post := range posts {
+		comments, err := fetchCommentsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+		posts[i].Comments = comments
+	}
+	return posts, nil
 }
