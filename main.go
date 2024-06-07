@@ -43,6 +43,7 @@ func main() {
 	input = strings.TrimSuffix(input, "\n")
 	inputInt, err := strconv.Atoi(input)
 	posts, _ := fetchPostsByUserID(inputInt)
+	//postsWithComments, _ := AppendCommentToPost(posts)
 	//postIDs := getPostIDs(posts)
 	//comments, _ := fetchCommentsByPostID(postIDs)
 	fmt.Println(input)
@@ -50,7 +51,9 @@ func main() {
 	//fmt.Println(postIDs)
 	//fmt.Println(comments)
 	//fmt.Println(len(comments))
-	fmt.Println(AppendCommentToPost(posts))
+	//fmt.Println(AppendCommentToPost(posts))
+	postsWithComments, _ := AppendCommentToPost(posts)
+	printFormattedPosts(postsWithComments)
 }
 
 func fetchPostsByUserID(userID int) ([]Post, error) {
@@ -146,4 +149,23 @@ func AppendCommentToPost(posts []Post) ([]Post, error) {
 		posts[i].Comments = comments
 	}
 	return posts, nil
+}
+
+func printFormattedPosts(posts []Post) {
+	for _, post := range posts {
+		fmt.Printf("UserID: %d\n", post.UserID)
+		fmt.Printf("ID: %d\n", post.ID)
+		fmt.Printf("Title: %s\n", post.Title)
+		fmt.Printf("Body: %s\n", post.Body)
+		fmt.Println("Comments: ")
+		for _, comment := range post.Comments {
+			fmt.Printf("\tPostID: %d\n", comment.PostID)
+			fmt.Printf("\tID: %d\n", comment.ID)
+			fmt.Printf("\tName: %s\n", comment.Name)
+			fmt.Printf("\tEmail: %s\n", comment.Email)
+			fmt.Printf("\tBody: %s\n", comment.Body)
+			fmt.Println()
+		}
+		fmt.Println("----------------------------------------")
+	}
 }
