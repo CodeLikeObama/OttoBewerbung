@@ -30,30 +30,47 @@ type Comment struct {
 
 func main() {
 	fmt.Print("Please enter userID: ")
-	reader := bufio.NewReader(os.Stdin)
+	userIDReader := bufio.NewReader(os.Stdin)
 	// ReadString will block until the delimiter is entered
-	input, err := reader.ReadString('\n') //delim is enter (line break)
+	userIDInput, err := userIDReader.ReadString('\n') //delim is enter (line break)
+	//TODO Maybe handle empty input
 	if err != nil {
-		fmt.Println("An error occured while reading input. Please try again", err)
+		fmt.Println("An error occured while reading userID Input. Please try again", err)
 		return
 	}
-	//TODO Maybe handle empty input
+	userIDInput = strings.TrimSuffix(userIDInput, "\n")
 
-	// remove the delimeter from the string
-	input = strings.TrimSuffix(input, "\n")
-	inputInt, err := strconv.Atoi(input)
+	fmt.Println("Please enter a Filter parameter: ")
+	filterReader := bufio.NewReader(os.Stdin)
+	filterInput, err := filterReader.ReadString('\n')
+	if err != nil {
+		fmt.Println("An error occured while reading filter parameters. Please try again", err)
+	}
+	filterInput = strings.TrimSuffix(filterInput, "\n")
+
+	inputInt, err := strconv.Atoi(userIDInput)
 	posts, _ := fetchPostsByUserID(inputInt)
-	//postsWithComments, _ := AppendCommentToPost(posts)
-	//postIDs := getPostIDs(posts)
-	//comments, _ := fetchCommentsByPostID(postIDs)
-	fmt.Println(input)
-	//fmt.Println(posts)
-	//fmt.Println(postIDs)
-	//fmt.Println(comments)
-	//fmt.Println(len(comments))
-	//fmt.Println(AppendCommentToPost(posts))
 	postsWithComments, _ := AppendCommentToPost(posts)
-	printFormattedPosts(postsWithComments)
+	filteredPosts := filterComments(postsWithComments, filterInput)
+	
+	printFormattedPosts(filteredPosts)
+
+	/*
+
+
+		//TODO Tidy up below
+		//postsWithComments, _ := AppendCommentToPost(posts)
+		//postIDs := getPostIDs(posts)
+		//comments, _ := fetchCommentsByPostID(postIDs)
+		fmt.Println(input)
+		//fmt.Println(posts)
+		//fmt.Println(postIDs)
+		//fmt.Println(comments)
+		//fmt.Println(len(comments))
+		//fmt.Println(AppendCommentToPost(posts))
+		postsWithComments, _ := AppendCommentToPost(posts)
+		printFormattedPosts(postsWithComments)
+	*/
 }
 
 func fetchPostsByUserID(userID int) ([]Post, error) {
@@ -168,4 +185,37 @@ func printFormattedPosts(posts []Post) {
 		}
 		fmt.Println("----------------------------------------")
 	}
+}
+
+/*
+func filterComments(posts []Post, filterParameter string) []Post {
+	for i, post := range posts {
+		var filteredComments []Comment
+		for _, comment := range post.Comments {
+			if strings.Contains(comment.Body, filterParameter) {
+				filteredComments = append(filteredComments, comment)
+			}
+		}
+		posts[i].Comments = filteredComments
+	}
+	return posts
+}
+
+*/
+
+func filterComments(posts []Post, filterParameter string) []Post {
+	if filterParameter == "" {
+		return posts
+	}
+	for i, post := range posts {
+		var filteredComments []Comment
+		for _, comment := range post.Comments {
+			normalizedBody := strings.ReplaceAll(comment.Body, "\n", " ") //need to replace the \n with blank space in the body if you search it
+			if strings.Contains(normalizedBody, filterParameter) {
+				filteredComments = append(filteredComments, comment)
+			}
+		}
+		posts[i].Comments = filteredComments
+	}
+	return posts
 }
