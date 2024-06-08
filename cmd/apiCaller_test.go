@@ -97,3 +97,19 @@ func TestFetchPostsByUserIDRange(t *testing.T) {
 		t.Errorf("fetchPostsByUserID returned an unexpected error: got %v, want %v", err2.Error(), expectedError2)
 	}
 }
+
+func getUserIDTest(t *testing.T) {
+	mockPosts := []Post{
+		{UserID: 1, ID: 1, Title: "Test Post", Body: "Body of test post"},
+		{UserID: 1, ID: 2, Title: "Test Post", Body: "Body of test post"},
+		{UserID: 1, ID: 4, Title: "Test Post", Body: "Body of test post"},
+	}
+
+	postIDs := getPostIDs(mockPosts)
+
+	expectedUserIDs := []int{1, 2, 4}
+
+	if !reflect.DeepEqual(postIDs, expectedUserIDs) {
+		t.Errorf("fetchPostsByUserID returned unexpected result: got %v, want %v", postIDs, expectedUserIDs)
+	}
+}
