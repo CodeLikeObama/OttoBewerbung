@@ -83,7 +83,7 @@ func CLI() (int, string) {
 func fetchDataAndPrint() {
 	userIDInt, filterInput := CLI()
 	posts, _ := fetchPostsByUserID(userIDInt)
-	postsWithComments, _ := AppendCommentToPost(posts)
+	postsWithComments, _ := appendCommentsToPosts(posts)
 	filteredPosts := filterComments(postsWithComments, filterInput)
 
 	printFormattedPosts(filteredPosts)
@@ -123,41 +123,18 @@ func getPostIDs(post []Post) []int {
 	return postIDS
 }
 
-/*
-func fetchCommentsByPostID(postIDs []int) ([]Comment, error) {
-	var allComments []Comment
+func fetchCommentsByPostIDs(postID []int) ([]Comment, error) {
 
-	for _, postID := range postIDs {
-		url := fmt.Sprintf("https://jsonplaceholder.typicode.com/comments?postId=%d", postID)
-		resp, err := http.Get(url)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		var comments []Comment
-		err = json.Unmarshal(body, &comments)
-		if err != nil {
-			return nil, err
-		}
-
-		allComments = append(allComments, comments...) //... variadic function so that each slice what we append can be andy size  and not a fixed size
+	query := "?"
+	for _, postID := range postID {
+		query += "&postId=" + strconv.Itoa(postID)
 	}
 
-	return allComments, nil
-}
-*/
-
-func fetchCommentsByPostID(postID int) ([]Comment, error) {
-	postIDString := strconv.Itoa(postID)
-	resp, err := http.Get("https://jsonplaceholder.typicode.com/comments?postId=" + postIDString)
+	resp, err := http.Get("https://jsonplaceholder.typicode.com/comments?postId=" + query)
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
@@ -174,15 +151,23 @@ func fetchCommentsByPostID(postID int) ([]Comment, error) {
 	return comments, nil
 }
 
-func AppendCommentToPost(posts []Post) ([]Post, error) {
-	for i, post := range posts {
-		comments, err := fetchCommentsByPostID(post.ID)
-		if err != nil {
-			return nil, err
-		}
-		posts[i].Comments = comments
+func appendCommentsToPosts(posts []Post) ([]Post, error) {
+	postIDs := getPostIDs(posts)
+	comments, err := fetchCommentsByPostIDs(postIDs)
+	if err != nil {
+		return nil, err
 	}
-	return posts, nil
+
+	commentsByPostID := make(map[int][]Comment)
+	for _, comment := range comments {
+		commentsByPostID[comment.PostID] = append(commentsByPostID[comment.PostID], comment)
+	}
+
+	for i, post := range posts {
+		posts[i].Comments = commentsByPostID[post.ID]
+	}
+
+	return posts, err
 }
 
 func printFormattedPosts(posts []Post) {
