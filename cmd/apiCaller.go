@@ -32,7 +32,7 @@ func fetchPostsByUserID(userID int, url string) ([]Post, error) {
 		return nil, err
 	}
 
-	return posts, err
+	return posts, nil
 }
 
 func fetchCommentsByPostIDs(postID []int, url string) ([]Comment, error) {
@@ -87,5 +87,5 @@ func appendCommentsToPosts(posts []Post, url string) ([]Post, error) {
 		posts[i].Comments = commentsByPostID[post.ID]
 	}
 
-	return posts, err
+	return posts, nil
 }

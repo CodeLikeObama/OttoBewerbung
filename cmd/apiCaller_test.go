@@ -73,3 +73,27 @@ func TestFetchCommentsByPostIDs(t *testing.T) {
 		t.Errorf("fetchCommentsByPostIDs returned unexpected result: got %v, want %v", comments, mockComments)
 	}
 }
+
+func TestFetchPostsByUserIDRange(t *testing.T) {
+	testURL := "thisisatestURL"
+
+	_, err := fetchPostsByUserID(-2, testURL)
+	if err == nil {
+		t.Errorf("fetchPostsByUserID did not return an error for invalid userID")
+	}
+
+	expectedError := "user ID out of range"
+	if err != nil && err.Error() != expectedError {
+		t.Errorf("fetchPostsByUserID returned an unexpected error: got %v, want %v", err.Error(), expectedError)
+	}
+
+	_, err2 := fetchPostsByUserID(12, testURL)
+	if err2 == nil {
+		t.Errorf("fetchPostsByUserID did not return an error for invalid userID")
+	}
+
+	expectedError2 := "user ID out of range"
+	if err != nil && err.Error() != expectedError2 {
+		t.Errorf("fetchPostsByUserID returned an unexpected error: got %v, want %v", err2.Error(), expectedError2)
+	}
+}
