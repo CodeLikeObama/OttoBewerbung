@@ -29,31 +29,8 @@ type Comment struct {
 }
 
 func main() {
-	fmt.Print("Please enter userID: ")
-	userIDReader := bufio.NewReader(os.Stdin)
-	// ReadString will block until the delimiter is entered
-	userIDInput, err := userIDReader.ReadString('\n') //delim is enter (line break)
-	//TODO Maybe handle empty input
-	if err != nil {
-		fmt.Println("An error occured while reading userID Input. Please try again", err)
-		return
-	}
-	userIDInput = strings.TrimSuffix(userIDInput, "\n")
 
-	fmt.Println("Please enter a Filter parameter: ")
-	filterReader := bufio.NewReader(os.Stdin)
-	filterInput, err := filterReader.ReadString('\n')
-	if err != nil {
-		fmt.Println("An error occured while reading filter parameters. Please try again", err)
-	}
-	filterInput = strings.TrimSuffix(filterInput, "\n")
-
-	inputInt, err := strconv.Atoi(userIDInput)
-	posts, _ := fetchPostsByUserID(inputInt)
-	postsWithComments, _ := AppendCommentToPost(posts)
-	filteredPosts := filterComments(postsWithComments, filterInput)
-	
-	printFormattedPosts(filteredPosts)
+	fetchDataAndPrint()
 
 	/*
 
@@ -73,10 +50,51 @@ func main() {
 	*/
 }
 
+func CLI() (int, string) {
+	fmt.Print("Please enter userID: ")
+	userIDReader := bufio.NewReader(os.Stdin)
+	// ReadString will block until the delimiter is entered
+	userIDInput, err := userIDReader.ReadString('\n') //delim is enter (line break)
+	if err != nil {
+		fmt.Println("An error occured while reading userID Input. Please try again", err)
+		CLI()
+	}
+	userIDInput = strings.TrimSuffix(userIDInput, "\n")
+	//handling empty input
+	if userIDInput == "" {
+		fmt.Println("Please enter userID and try again")
+		CLI()
+	}
+
+	fmt.Println("Please enter a Filter parameter: ")
+	filterReader := bufio.NewReader(os.Stdin)
+	filterInput, err := filterReader.ReadString('\n')
+	if err != nil {
+		fmt.Println("An error occured while reading filter parameters. Please try again", err)
+		CLI()
+	}
+	filterInput = strings.TrimSuffix(filterInput, "\n")
+
+	userIDInt, err := strconv.Atoi(userIDInput)
+
+	return userIDInt, filterInput
+}
+
+func fetchDataAndPrint() {
+	userIDInt, filterInput := CLI()
+	posts, _ := fetchPostsByUserID(userIDInt)
+	postsWithComments, _ := AppendCommentToPost(posts)
+	filteredPosts := filterComments(postsWithComments, filterInput)
+
+	printFormattedPosts(filteredPosts)
+}
+
 func fetchPostsByUserID(userID int) ([]Post, error) {
+	var posts []Post
+
 	//handle invalid Input
-	if userID > 10 {
-		return nil, errors.New("User ID out of range")
+	if userID > 10 || userID < 1 {
+		return nil, errors.New("user ID out of range")
 	}
 	//input valid
 	userIDString := strconv.Itoa(userID)
@@ -89,7 +107,6 @@ func fetchPostsByUserID(userID int) ([]Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	var posts []Post
 	err = json.Unmarshal(body, &posts) //body wird gelesen und in ein Pointer zu Posts geschrieben
 	if err != nil {
 		return nil, err
@@ -186,22 +203,6 @@ func printFormattedPosts(posts []Post) {
 		fmt.Println("----------------------------------------")
 	}
 }
-
-/*
-func filterComments(posts []Post, filterParameter string) []Post {
-	for i, post := range posts {
-		var filteredComments []Comment
-		for _, comment := range post.Comments {
-			if strings.Contains(comment.Body, filterParameter) {
-				filteredComments = append(filteredComments, comment)
-			}
-		}
-		posts[i].Comments = filteredComments
-	}
-	return posts
-}
-
-*/
 
 func filterComments(posts []Post, filterParameter string) []Post {
 	if filterParameter == "" {
