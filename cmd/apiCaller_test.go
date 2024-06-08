@@ -75,9 +75,9 @@ func TestFetchCommentsByPostIDs(t *testing.T) {
 }
 
 func TestFetchPostsByUserIDRange(t *testing.T) {
-	testURL := "thisisatestURL"
+	mockURL := "thisisatestURL"
 
-	_, err := fetchPostsByUserID(-2, testURL)
+	_, err := fetchPostsByUserID(-2, mockURL)
 	if err == nil {
 		t.Errorf("fetchPostsByUserID did not return an error for invalid userID")
 	}
@@ -87,7 +87,7 @@ func TestFetchPostsByUserIDRange(t *testing.T) {
 		t.Errorf("fetchPostsByUserID returned an unexpected error: got %v, want %v", err.Error(), expectedError)
 	}
 
-	_, err2 := fetchPostsByUserID(12, testURL)
+	_, err2 := fetchPostsByUserID(12, mockURL)
 	if err2 == nil {
 		t.Errorf("fetchPostsByUserID did not return an error for invalid userID")
 	}
@@ -98,7 +98,7 @@ func TestFetchPostsByUserIDRange(t *testing.T) {
 	}
 }
 
-func getUserIDTest(t *testing.T) {
+func TestGetUserId(t *testing.T) {
 	mockPosts := []Post{
 		{UserID: 1, ID: 1, Title: "Test Post", Body: "Body of test post"},
 		{UserID: 1, ID: 2, Title: "Test Post", Body: "Body of test post"},
@@ -111,5 +111,48 @@ func getUserIDTest(t *testing.T) {
 
 	if !reflect.DeepEqual(postIDs, expectedUserIDs) {
 		t.Errorf("fetchPostsByUserID returned unexpected result: got %v, want %v", postIDs, expectedUserIDs)
+	}
+}
+
+func TestAppendCommentsToPosts(t *testing.T) {
+
+	mockPosts := []Post{
+		{UserID: 1, ID: 1, Title: "Test Post", Body: "Body of test post"},
+	}
+
+	mockComments := []Comment{
+		{PostID: 1, ID: 1, Name: "Test Comment 1", Email: "test1@example.com", Body: "Body of test comment 1"},
+		{PostID: 1, ID: 2, Name: "Test Comment 2", Email: "test2@example.com", Body: "Body of test comment 2"},
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp, _ := json.Marshal(mockComments)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}))
+	defer server.Close()
+
+	posts, err := appendCommentsToPosts(mockPosts, server.URL)
+
+	if err != nil {
+		t.Errorf("appendCommentsToPosts returned an error: %v", err)
+	}
+
+	expectedPosts := []Post{
+		{
+			UserID: 1,
+			ID:     1,
+			Title:  "Test Post",
+			Body:   "Body of test post",
+			Comments: []Comment{
+				{PostID: 1, ID: 1, Name: "Test Comment 1", Email: "test1@example.com", Body: "Body of test comment 1"},
+				{PostID: 1, ID: 2, Name: "Test Comment 2", Email: "test2@example.com", Body: "Body of test comment 2"},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(posts, expectedPosts) {
+		t.Errorf("appendCommentsToPosts returned unexpected result: got %v, want %v", posts, expectedPosts)
 	}
 }
