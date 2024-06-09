@@ -17,7 +17,7 @@ func filterComments(posts []Post, filterParameter string) []Post {
 	for i, post := range posts {
 		var filteredComments []Comment
 		for _, comment := range post.Comments {
-			normalizedBody := strings.ReplaceAll(comment.Body, "\n", " ") //need to replace the \n with blank space in the body if you search it
+			normalizedBody := strings.ReplaceAll(comment.Body, "\n", " ")
 			if strings.Contains(normalizedBody, normalizedFilterParameter) {
 				filteredComments = append(filteredComments, comment)
 			}

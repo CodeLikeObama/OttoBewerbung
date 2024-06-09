@@ -89,10 +89,10 @@ func TestFilterCommentsEmptyInput(t *testing.T) {
 		},
 	}
 
-	unfliteredPosts := filterComments(mockPosts, "")
+	unfilteredPosts := filterComments(mockPosts, "")
 
-	if !reflect.DeepEqual(unfliteredPosts, mockPosts) {
-		t.Errorf("filterComments returned unexpected results: got %v want %v", unfliteredPosts, mockPosts)
+	if !reflect.DeepEqual(unfilteredPosts, mockPosts) {
+		t.Errorf("filterComments returned unexpected results: got %v want %v", unfilteredPosts, mockPosts)
 	}
 
 }
