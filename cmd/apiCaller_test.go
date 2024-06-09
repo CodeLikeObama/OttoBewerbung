@@ -14,25 +14,21 @@ func TestFetchPostsByUserID(t *testing.T) {
 		{UserID: 1, ID: 2, Title: "Test Post 2", Body: "Body of test post 2"},
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check the request URL
+
 		expectedURL := "/posts?userId=1"
 		if r.URL.String() != expectedURL {
 			t.Errorf("Expected URL: %s, got: %s", expectedURL, r.URL.String())
 		}
 
-		// Marshal posts to JSON
 		resp, _ := json.Marshal(mockPosts)
 
-		// Write response
 		w.WriteHeader(http.StatusOK)
 		w.Write(resp)
 	}))
 	defer server.Close()
 
-	// Call the function to test
 	posts, err := fetchPostsByUserID(1, server.URL)
 
-	// Check for errors
 	if err != nil {
 		t.Errorf("fetchPostsByUserID returned an error: %v", err)
 	}
