@@ -1,85 +1,59 @@
 package main
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
-
 	"github.com/spf13/cobra"
+	"os"
 )
 
-/*
-readUserID prompts the STDOUT so the user can enter the wanted userID and returns it as an Integer
-*/
-func readUserID() (int, error) {
-	fmt.Print("Please enter userID: ")
-	userIDReader := bufio.NewReader(os.Stdin)
-
-	userIDInput, err := userIDReader.ReadString('\n')
-	if err != nil {
-		return 0, errors.New("an error occured while reading userID Input. Please try again")
-	}
-	userIDInput = strings.TrimSuffix(userIDInput, "\n")
-
-	if userIDInput == "" {
-		return 0, errors.New("please enter userID and try again")
-	}
-
-	userIDInt, err := strconv.Atoi(userIDInput)
-	if err != nil {
-		return 0, errors.New("userID must be an Integer, please try again")
-	}
-
-	return userIDInt, nil
-}
+const postUrl string = "https://jsonplaceholder.typicode.com"
+const commentUrl string = "https://jsonplaceholder.typicode.com"
 
 /*
-readFilterInput prompts the STDOUT so the user can enter the wanted filter parameter to filter the comments of posts and returns the filter parameter
+FetchAndPrintData takes its input and fetches the Post's with it and appends
+the comments to it and then prints them according to the format.
 */
-func readFilterInput() string {
-	fmt.Println("Please enter a Filter parameter: ")
-	filterReader := bufio.NewReader(os.Stdin)
-	filterInput, err := filterReader.ReadString('\n')
-	if err != nil {
-		fmt.Println("An error occured while reading filter parameters. Please try again", err)
-	}
-	filterInput = strings.TrimSuffix(filterInput, "\n")
+func FetchAndPrintData(userIDInt int, filterInput string) {
 
-	return filterInput
+	posts, err := fetchPostsByUserID(userIDInt, postUrl)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
+	postsWithComments, err := appendCommentsToPosts(posts, commentUrl)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
+	filteredPosts := filterComments(postsWithComments, filterInput)
+
+	printFormattedPosts(filteredPosts)
 }
 
 /*
 CLI reads and returns the userID and filter provided by the user
 */
-func CLI() (int, string) {
+func CLI() {
 	var userId int
 	var filterInput string
 
 	var cmd = &cobra.Command{
 		Use: "otto",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(args)
-			fmt.Println(userId)
+			FetchAndPrintData(userId, filterInput)
 		},
 	}
 
-	cmd.PersistentFlags().IntVarP(&userId, "userId", "uid", 0, "Specify a userID")
+	cmd.Flags().IntVarP(&userId, "userId", "u", 0, "Specify a userID")
 
-	if err := cmd.Execute(); err != nil {
+	cmd.MarkFlagRequired("userId") //handles Err by itself
+
+	cmd.Flags().StringVarP(&filterInput, "filter", "f", "", "Specify a filterParameter")
+
+	err := cmd.Execute()
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	fmt.Println(userId)
-	userId, err := readUserID()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	filterInput = readFilterInput()
-
-	return userId, filterInput
 }
