@@ -8,6 +8,25 @@ import (
 	"strconv"
 )
 
+type Post struct {
+	UserID   int    `json:"userId"`
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Body     string `json:"body"`
+	Comments []Comment
+}
+
+type Comment struct {
+	PostID int    `json:"postId"`
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Body   string `json:"body"`
+}
+
+/*
+fetchPostsByUserID fetches the API by the submitted userID and returns the Posts for given userID marshalled to the Post GO Struct
+*/
 func fetchPostsByUserID(userID int, url string) ([]Post, error) {
 	var posts []Post
 
@@ -16,18 +35,18 @@ func fetchPostsByUserID(userID int, url string) ([]Post, error) {
 	if userID > 10 || userID < 1 {
 		return nil, errors.New("user ID out of range")
 	}
-	//input valid
 
+	//input valid
 	resp, err := http.Get(url + path)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()            //verbindung schließen, wenn alles gelesen ist
-	body, err := io.ReadAll(resp.Body) //html Body wird gelesen
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(body, &posts) //body wird gelesen und in ein Pointer zu Posts geschrieben
+	err = json.Unmarshal(body, &posts)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +54,11 @@ func fetchPostsByUserID(userID int, url string) ([]Post, error) {
 	return posts, nil
 }
 
+/*
+fetchCommentsByPostIDs fetches the comments for a Slice of postIDs and returns them marshalled into the Comment Go Struct
+*/
 func fetchCommentsByPostIDs(postID []int, url string) ([]Comment, error) {
+	var comments []Comment
 	query := "/comments?"
 
 	for _, postID := range postID {
@@ -54,7 +77,6 @@ func fetchCommentsByPostIDs(postID []int, url string) ([]Comment, error) {
 		return nil, err
 	}
 
-	var comments []Comment
 	err = json.Unmarshal(body, &comments)
 	if err != nil {
 		return nil, err
@@ -63,17 +85,25 @@ func fetchCommentsByPostIDs(postID []int, url string) ([]Comment, error) {
 	return comments, nil
 }
 
+/*
+getPostIDs gets all the IDs of a Post and returns them as a slice of Integers
+*/
 func getPostIDs(post []Post) []int {
 	var postIDS []int
+
 	for _, post := range post {
 		postIDS = append(postIDS, post.ID)
 	}
 	return postIDS
 }
 
+/*
+appendCommentsToPosts takes posts and a URl (for testing purposes) and appends the comments to the corresponding posts and returns them as a Post Go Struct
+*/
 func appendCommentsToPosts(posts []Post, url string) ([]Post, error) {
 	postIDs := getPostIDs(posts)
 	comments, err := fetchCommentsByPostIDs(postIDs, url)
+
 	if err != nil {
 		return nil, err
 	}

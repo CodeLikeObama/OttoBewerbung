@@ -4,6 +4,9 @@ import (
 	"fmt"
 )
 
+/*
+printFormattedPosts takes a Slice of Post's and prints their attributes nicely formatted to the STDOUT
+*/
 func printFormattedPosts(posts []Post) {
 	for _, post := range posts {
 		fmt.Printf("UserID: %d\n", post.UserID)

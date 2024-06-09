@@ -9,16 +9,19 @@ import (
 	"strings"
 )
 
+/*
+readUserID prompts the STDOUT so the user can enter the wanted userID and returns it ad an Integer
+*/
 func readUserID() (int, error) {
 	fmt.Print("Please enter userID: ")
 	userIDReader := bufio.NewReader(os.Stdin)
-	// ReadString will block until the delimiter is entered
-	userIDInput, err := userIDReader.ReadString('\n') //delim is enter (line break)
+
+	userIDInput, err := userIDReader.ReadString('\n')
 	if err != nil {
 		return 0, errors.New("an error occured while reading userID Input. Please try again")
 	}
 	userIDInput = strings.TrimSuffix(userIDInput, "\n")
-	//handling empty input
+
 	if userIDInput == "" {
 		return 0, errors.New("please enter userID and try again")
 	}
@@ -31,6 +34,9 @@ func readUserID() (int, error) {
 	return userIDInt, nil
 }
 
+/*
+readFilterInput prompts the STDOUT so the user can enter the wanted filter parameter to filter the comments of posts and returns the filter parameter
+*/
 func readFilterInput() string {
 	fmt.Println("Please enter a Filter parameter: ")
 	filterReader := bufio.NewReader(os.Stdin)
@@ -43,6 +49,9 @@ func readFilterInput() string {
 	return filterInput
 }
 
+/*
+CLI handles the complete CLI functionality by calling readUserID() and readFilterInput(), handling the errors and returning the userID and filterInput
+*/
 func CLI() (int, string) {
 
 	userId, err := readUserID()
