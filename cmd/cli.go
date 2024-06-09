@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 /*
@@ -53,13 +55,31 @@ func readFilterInput() string {
 CLI reads and returns the userID and filter provided by the user
 */
 func CLI() (int, string) {
+	var userId int
+	var filterInput string
 
+	var cmd = &cobra.Command{
+		Use: "otto",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(args)
+			fmt.Println(userId)
+		},
+	}
+
+	cmd.PersistentFlags().IntVarP(&userId, "userId", "uid", 0, "Specify a userID")
+
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	fmt.Println(userId)
 	userId, err := readUserID()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	filterInput := readFilterInput()
+	filterInput = readFilterInput()
 
 	return userId, filterInput
 }
