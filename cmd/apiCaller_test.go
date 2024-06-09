@@ -50,7 +50,6 @@ func TestFetchCommentsByPostIDs(t *testing.T) {
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		expectedURL := "/comments?&postId=1&postId=2"
 		if r.URL.String() != expectedURL {
 			t.Errorf("Expected URL: %s, got: %s", expectedURL, r.URL.String())
@@ -78,24 +77,23 @@ func TestFetchPostsByUserIDRange(t *testing.T) {
 	mockURL := "thisisatestURL"
 
 	_, err := fetchPostsByUserID(-2, mockURL)
+	expectedError := "user ID out of range"
+
 	if err == nil {
 		t.Errorf("fetchPostsByUserID did not return an error for invalid userID")
-	}
-
-	expectedError := "user ID out of range"
-	if err != nil && err.Error() != expectedError {
+	} else if err.Error() != expectedError {
 		t.Errorf("fetchPostsByUserID returned an unexpected error: got %v, want %v", err.Error(), expectedError)
 	}
 
 	_, err2 := fetchPostsByUserID(12, mockURL)
+	expectedError2 := "user ID out of range"
+
 	if err2 == nil {
 		t.Errorf("fetchPostsByUserID did not return an error for invalid userID")
-	}
-
-	expectedError2 := "user ID out of range"
-	if err != nil && err.Error() != expectedError2 {
+	} else if err2.Error() != expectedError2 {
 		t.Errorf("fetchPostsByUserID returned an unexpected error: got %v, want %v", err2.Error(), expectedError2)
 	}
+
 }
 
 func TestGetUserId(t *testing.T) {
@@ -141,14 +139,11 @@ func TestAppendCommentsToPosts(t *testing.T) {
 
 	expectedPosts := []Post{
 		{
-			UserID: 1,
-			ID:     1,
-			Title:  "Test Post",
-			Body:   "Body of test post",
-			Comments: []Comment{
-				{PostID: 1, ID: 1, Name: "Test Comment 1", Email: "test1@example.com", Body: "Body of test comment 1"},
-				{PostID: 1, ID: 2, Name: "Test Comment 2", Email: "test2@example.com", Body: "Body of test comment 2"},
-			},
+			UserID:   1,
+			ID:       1,
+			Title:    "Test Post",
+			Body:     "Body of test post",
+			Comments: mockComments,
 		},
 	}
 

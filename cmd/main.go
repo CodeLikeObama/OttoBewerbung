@@ -7,10 +7,6 @@ import (
 const postUrl string = "https://jsonplaceholder.typicode.com"
 const commentUrl string = "https://jsonplaceholder.typicode.com"
 
-func main() {
-	FetchAndPrintData()
-}
-
 /*
 FetchAndPrintData calls the CLI() Function, takes its input and fetches the Post's with it and appends
 the comments to it and then prints them according to the format.
@@ -30,4 +26,8 @@ func FetchAndPrintData() {
 	filteredPosts := filterComments(postsWithComments, filterInput)
 
 	printFormattedPosts(filteredPosts)
+}
+
+func main() {
+	FetchAndPrintData()
 }

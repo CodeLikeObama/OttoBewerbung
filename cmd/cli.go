@@ -10,7 +10,7 @@ import (
 )
 
 /*
-readUserID prompts the STDOUT so the user can enter the wanted userID and returns it ad an Integer
+readUserID prompts the STDOUT so the user can enter the wanted userID and returns it as an Integer
 */
 func readUserID() (int, error) {
 	fmt.Print("Please enter userID: ")
@@ -50,7 +50,7 @@ func readFilterInput() string {
 }
 
 /*
-CLI handles the complete CLI functionality by calling readUserID() and readFilterInput(), handling the errors and returning the userID and filterInput
+CLI reads and returns the userID and filter provided by the user
 */
 func CLI() (int, string) {
 

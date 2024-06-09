@@ -14,7 +14,6 @@ func filterComments(posts []Post, filterParameter string) []Post {
 	}
 
 	normalizedFilterParameter := strings.ReplaceAll(filterParameter, "\n", " ")
-
 	for i, post := range posts {
 		var filteredComments []Comment
 		for _, comment := range post.Comments {

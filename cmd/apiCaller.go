@@ -25,18 +25,17 @@ type Comment struct {
 }
 
 /*
-fetchPostsByUserID fetches the API by the submitted userID and returns the Posts for given userID marshalled to the Post GO Struct
+fetchPostsByUserID fetches the posts by a specific userID and returns the corresponding Post's
 */
 func fetchPostsByUserID(userID int, url string) ([]Post, error) {
 	var posts []Post
 
 	var path = "/posts?userId=" + strconv.Itoa(userID)
-	//handle invalid Input
+	//handle invalid input
 	if userID > 10 || userID < 1 {
 		return nil, errors.New("user ID out of range")
 	}
 
-	//input valid
 	resp, err := http.Get(url + path)
 	if err != nil {
 		return nil, err
@@ -55,7 +54,7 @@ func fetchPostsByUserID(userID int, url string) ([]Post, error) {
 }
 
 /*
-fetchCommentsByPostIDs fetches the comments for a Slice of postIDs and returns them marshalled into the Comment Go Struct
+fetchCommentsByPostIDs fetches the comments for a slice of postIDs and returns them as Comment's
 */
 func fetchCommentsByPostIDs(postID []int, url string) ([]Comment, error) {
 	var comments []Comment
@@ -98,7 +97,7 @@ func getPostIDs(post []Post) []int {
 }
 
 /*
-appendCommentsToPosts takes posts and a URl (for testing purposes) and appends the comments to the corresponding posts and returns them as a Post Go Struct
+appendCommentsToPosts takes posts and a URl and matches the comments to the corresponding Post's and returns them
 */
 func appendCommentsToPosts(posts []Post, url string) ([]Post, error) {
 	postIDs := getPostIDs(posts)

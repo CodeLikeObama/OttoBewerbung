@@ -5,7 +5,7 @@ import (
 )
 
 /*
-printFormattedPosts takes a Slice of Post's and prints their attributes nicely formatted to the STDOUT
+printFormattedPosts takes a slice of Post's and prints their attributes nicely formatted to the STDOUT
 */
 func printFormattedPosts(posts []Post) {
 	for _, post := range posts {
