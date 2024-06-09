@@ -5,8 +5,8 @@ import (
 )
 
 /*
-filterComments takes Posts and a filter parameter string and filters the comments for each post according to the filter parameter, and only appends the
-comments to the posts which include the filter parameter, if the filter parameter is empty it returns every comment
+filterComments takes a slice of Post's and a filter parameter and filters the Comment's of the posts according to it
+and returns the new Post's with filtered Comment's
 */
 func filterComments(posts []Post, filterParameter string) []Post {
 	if filterParameter == "" {
